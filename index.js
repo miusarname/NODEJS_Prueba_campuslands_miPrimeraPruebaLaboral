@@ -2,6 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import path from "path";
 import dotenv from 'dotenv';
+import bodegas from './routes/bodegas.routes.js'
+
 
 const app = express();
 
@@ -14,10 +16,8 @@ app.set("port", process.env.PORT || 3000);
 app.use(morgan("dev"));
 app.use(express.json());
 
-// //Routes
-// const Routes = require("./routes/task.routes"); //Define a const Routes
-
-// app.use("/api/task", Routes);
+//Routes
+app.use('/bodegas', bodegas);
 
 
 //Server

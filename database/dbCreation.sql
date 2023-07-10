@@ -22,7 +22,7 @@ CREATE TABLE historiales (
 
 CREATE TABLE bodegas(
     id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
+    nombre VARCHAR(255) NOT NULL UNIQUE ,
     id_responsable BIGINT(20) UNSIGNED,
     estado TINYINT(4),
     created_by BIGINT(20) UNSIGNED,
