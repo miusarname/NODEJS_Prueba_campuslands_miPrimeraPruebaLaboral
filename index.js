@@ -1,7 +1,7 @@
 import express from "express";
 import morgan from "morgan";
-import path from "path";
 import dotenv from 'dotenv';
+import path from 'path'
 import bodegas from './routes/bodegas.routes.js'
 
 
@@ -15,6 +15,8 @@ app.set("port", process.env.PORT || 3000);
 //Middlewares
 app.use(morgan("dev"));
 app.use(express.json());
+front= path.join(__dirname + '/public')
+app.use(express.static(front)); 
 
 //Routes
 app.use('/bodegas', bodegas);
