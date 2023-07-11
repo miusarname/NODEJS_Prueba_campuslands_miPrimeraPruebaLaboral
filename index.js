@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import bodegas from "./routes/bodegas.routes.js";
 import productos from "./routes/productos.routes.js";
+import inventarios from './routes/inventarios.routes.js'
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(cors({ origin: "*" }));
 
 //Routes
 app.use("/bodegas", bodegas);
+app.use('/inventarios',inventarios);
 app.use("/productos", productos);
 
 //Server
