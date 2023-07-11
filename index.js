@@ -5,6 +5,7 @@ import cors from 'cors'
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import bodegas from './routes/bodegas.routes.js'
+import productos from './routes/productos.routes.js'
 
 
 const app = express();
@@ -25,6 +26,7 @@ app.use(cors({origin: '*'}));
 
 //Routes
 app.use('/bodegas', bodegas);
+app.use('/productos',productos)
 
 
 //Server
