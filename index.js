@@ -1,12 +1,11 @@
 import express from "express";
 import morgan from "morgan";
-import dotenv from 'dotenv';
-import cors from 'cors'
-import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
-import bodegas from './routes/bodegas.routes.js'
-import productos from './routes/productos.routes.js'
-
+import dotenv from "dotenv";
+import cors from "cors";
+import { fileURLToPath } from "url";
+import path, { dirname } from "path";
+import bodegas from "./routes/bodegas.routes.js";
+import productos from "./routes/productos.routes.js";
 
 const app = express();
 
@@ -16,18 +15,15 @@ const __filename = fileURLToPath(import.meta.url);
 app.set("port", process.env.PORT || 3000);
 const __dirname = dirname(__filename);
 
-
-
 //Middlewares
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({origin: '*'}));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(cors({ origin: "*" }));
 
 //Routes
-app.use('/bodegas', bodegas);
-app.use('/productos',productos)
-
+app.use("/bodegas", bodegas);
+app.use("/productos", productos);
 
 //Server
 app.listen(app.get("port"), () => {
