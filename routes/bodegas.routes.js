@@ -1,8 +1,12 @@
-import {Router} from 'express';
-import mysql from 'mysql2'
+import express from 'express';
+import mysql from 'mysql2';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
 
-const bodega = Router();
+const bodega = express.Router();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 let con = undefined;
 
 bodega.use((req, res, next) => {
@@ -38,9 +42,12 @@ bodega.use((req, res, next) => {
     }
   });
 
-  bodega.get('/bodegas-ordenadas-alfabéticamente',(req, res) =>{
-    res.send('a')
-  })
+  bodega.get('/bodegas-ordenadas-alfabeticamente', (req, res) => {
+    const filePath = path.join(__dirname, './public/dist');
+    console.log(filePath)
+    res.sendFile(filePath +'/index.html');
+  });
+  
 
   bodega.post("/", (req, res) => {
     con.query(
