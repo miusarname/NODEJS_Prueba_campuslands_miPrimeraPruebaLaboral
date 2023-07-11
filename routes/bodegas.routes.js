@@ -39,8 +39,20 @@ bodega.use((req, res, next) => {
   });
 
   bodega.get('/bodegas-ordenadas-alfabéticamente',(req, res) =>{
-    
+    res.send('a')
   })
 
+  bodega.post("/", (req, res) => {
+    con.query(
+      `INSERT INTO bodegas (nombre, id_responsable,estado,created_by,update_by) VALUES (?,?,?,?,?)`,
+      [req.body.nombre, req.body.id_responsable, req.body.estado, req.body.update_by,req.body.created_by],
+      (err, data, fils) => {
+        console.log(err);
+        console.log(data);
+        console.log(fils);
+        res.sendStatus(data.affectedRows +200).send();
+      }
+    );
+  });
 
 export default bodega
