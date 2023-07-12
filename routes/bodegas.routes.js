@@ -1,5 +1,6 @@
 import express from "express";
 import mysql from "mysql2";
+import axios from 'axios'
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 
@@ -42,11 +43,18 @@ bodega.get("/", (req, res) => {
   }
 });
 
-bodega.get("/bodegas-ordenadas-alfabeticamente", (req, res) => {
-  const filePath = path.join(__dirname, "./public/dist");
-  console.log(filePath);
-  res.sendFile(filePath + "/index.html");
+bodega.get('/bodegas-ordenadas-alfabeticamente', async (req, res) => {
+  try {
+    const resp = await axios.get('http://localhost:3002/bodegas');
+    const toSend = resp.data.sort((a, b) => a.nombre.localeCompare(b.nombre));; // Obtén los datos de response
+
+    res.json(toSend); // Envía solo los datos relevantes en la respuesta JSON
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
+
 
 bodega.post("/", (req, res) => {
   con.query(
