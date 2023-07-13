@@ -1,11 +1,13 @@
 import express from "express";
 import mysql from "mysql2";
+import {plainToClass} from 'class-transformer'
+import {Products} from '../DTO/products.js'
 
 const productos = express.Router();
-let con = undefined;
-let insertIds= undefined;
+let con:any;
+let insertIds:number;
 
-productos.use((req, res, next) => {
+productos.use((req:any, res:any, next:any) => {
   try {
     con = mysql.createPool({
       host: process.env.DB_HOST,
@@ -21,7 +23,7 @@ productos.use((req, res, next) => {
   }
 });
 
-productos.get("/ordenados-descendente", (req, res) => {
+productos.get("/ordenados-descendente", (req:object, res:any) => {
   const query = `
   SELECT p.*, SUM(b.cantidad) AS Total
   FROM productos p
@@ -30,7 +32,7 @@ productos.get("/ordenados-descendente", (req, res) => {
   ORDER BY Total DESC LIMIT 0,100
   `;
 
-  con.query(query, (err, results) => {
+  con.query(query, (err:Error, results:any):void => {
     if (err) {
       console.error(err);
       res.sendStatus(500);
@@ -40,7 +42,13 @@ productos.get("/ordenados-descendente", (req, res) => {
   });
 });
 
-productos.post("/insertar-producto", (req, res) => {
+productos.post("/insertar-producto", (req:any, res:any) => {
+  try {
+    var dataReq:any = plainToClass(Products, req.body);
+    console.log(dataReq)
+  } catch (error) {
+    
+  }
   try{
     con.query(`INSERT INTO productos(nombre,descripcion,estado,created_by,update_by) VALUES (?,?,?,?,?)`,
   [
@@ -50,7 +58,7 @@ productos.post("/insertar-producto", (req, res) => {
     req.body.created_by,
     req.body.update_by,
   ],
-  (err, data, fils) => {
+  (err:Error, data:any, fils:any) => {
     if (err) {
       //console.log(err);
       res.sendStatus(500);
@@ -73,7 +81,7 @@ productos.post("/insertar-producto", (req, res) => {
     req.body.created_by,
     req.body.update_by
   ],
-  (err, data, fils) => {
+  (err:Error, data:any, fils:any) => {
     console.log(err);
     console.log(data);
     console.log(fils);

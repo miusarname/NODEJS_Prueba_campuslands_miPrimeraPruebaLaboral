@@ -7,19 +7,17 @@ import path, { dirname } from "path";
 import bodegas from "./routes/bodegas.routes.js";
 import productos from "./routes/productos.routes.js";
 import inventarios from './routes/inventarios.routes.js'
+import "reflect-metadata";
 
 const app = express();
 
 //setting
 dotenv.config();
-const __filename = fileURLToPath(import.meta.url);
 app.set("port", process.env.PORT || 3000);
-const __dirname = dirname(__filename);
 
 //Middlewares
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
 app.use(cors({ origin: "*" }));
 
 //Routes

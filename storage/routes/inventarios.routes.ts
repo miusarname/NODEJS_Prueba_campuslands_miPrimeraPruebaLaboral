@@ -1,10 +1,10 @@
-import express from "express";
+import express, { Router } from "express";
 import mysql from "mysql2";
 
-const inventarios = express.Router();
-let connection = undefined; 
+const inventarios:Router = express.Router();
+let connection:any
 
-inventarios.use((req, res, next) => {
+inventarios.use((req:any, res, next) => {
     try {
         connection = mysql.createPool({
         host: process.env.DB_HOST,
@@ -12,7 +12,7 @@ inventarios.use((req, res, next) => {
         password: process.env.DB_PASSWORD,
         database: process.env.DATABASE,
       });
-      console.log(con);
+      console.log(connection);
       next();
     } catch (e) {
       res.sendStatus(500);
@@ -28,7 +28,7 @@ inventarios.use((req, res, next) => {
   connection.query(
     'SELECT * FROM inventarios WHERE id_producto = ? AND id_bodega = ?',
     [id_producto, id_bodega],
-    (error, results) => {
+    (error:any, results:any) => {
       if (error) {
         console.error('Error al verificar la existencia del registro:', error);
         res.status(500).json({ error: 'Ocurrió un error al verificar la existencia del registro' });
@@ -40,7 +40,7 @@ inventarios.use((req, res, next) => {
         connection.query(
           'INSERT INTO inventarios (id_producto, id_bodega, cantidad) VALUES (?, ?, ?)',
           [id_producto, id_bodega, cantidad],
-          (error) => {
+          (error:any) => {
             if (error) {
               console.error('Error al insertar el registro:', error);
               res.status(500).json({ error: 'Ocurrió un error al insertar el registro' });
@@ -58,7 +58,7 @@ inventarios.use((req, res, next) => {
         connection.query(
           'UPDATE inventarios SET cantidad = ? WHERE id_producto = ? AND id_bodega = ?',
           [newCantidad, id_producto, id_bodega],
-          (error) => {
+          (error:any) => {
             if (error) {
               console.error('Error al actualizar el registro:', error);
               res.status(500).json({ error: 'Ocurrió un error al actualizar el registro' });
