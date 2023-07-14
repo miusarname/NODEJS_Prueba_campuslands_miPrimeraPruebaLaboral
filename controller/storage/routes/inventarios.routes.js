@@ -53,4 +53,67 @@ inventarios.post('/', (req, res) => {
         }
     });
 });
+inventarios.put('/traslado', (req, res) => {
+    const { origen, destino, cantidad } = req.body;
+    // Verificar que la cantidad a trasladar sea posible
+    connection.query('SELECT unidades FROM inventarios WHERE bodega = ?', [origen], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Error en la consulta de inventarios.' });
+        }
+        const unidadesEnOrigen = results[0].unidades;
+        if (unidadesEnOrigen < cantidad) {
+            return res.status(400).json({ error: 'No hay suficientes unidades en la bodega de origen.' });
+        }
+        // Realizar el traslado
+        connection.beginTransaction((err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: 'Error al iniciar la transacción.' });
+            }
+            // Actualizar la bodega de origen
+            connection.query('UPDATE inventarios SET unidades = unidades - ? WHERE bodega = ?', [cantidad, origen], (err) => {
+                if (err) {
+                    connection.rollback(() => {
+                        console.error(err);
+                        return res.status(500).json({ error: 'Error al actualizar la bodega de origen.' });
+                    });
+                }
+                // Actualizar la bodega de destino
+                connection.query('UPDATE inventarios SET unidades = unidades + ? WHERE bodega = ?', [cantidad, destino], (err) => {
+                    if (err) {
+                        connection.rollback(() => {
+                            console.error(err);
+                            return res.status(500).json({ error: 'Error al actualizar la bodega de destino.' });
+                        });
+                    }
+                    // Insertar en la tabla de historiales
+                    const registro = {
+                        origen,
+                        destino,
+                        cantidad,
+                        fecha: new Date(),
+                    };
+                    connection.query('INSERT INTO historiales SET ?', registro, (err) => {
+                        if (err) {
+                            connection.rollback(() => {
+                                console.error(err);
+                                return res.status(500).json({ error: 'Error al insertar en la tabla de historiales.' });
+                            });
+                        }
+                        connection.commit((err) => {
+                            if (err) {
+                                connection.rollback(() => {
+                                    console.error(err);
+                                    return res.status(500).json({ error: 'Error al confirmar la transacción.' });
+                                });
+                            }
+                            res.json({ message: 'Traslado realizado con éxito.' });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
 export default inventarios;
