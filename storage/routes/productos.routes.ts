@@ -1,13 +1,13 @@
 import express from "express";
 import mysql from "mysql2";
-import {plainToClass} from 'class-transformer'
-import {Products} from '../DTO/products.js'
+import { plainToClass } from "class-transformer";
+import { Products } from "../DTO/products.js";
 
 const productos = express.Router();
-let con:any;
-let insertIds:number;
+var insertIds;
+let con: any;
 
-productos.use((req:any, res:any, next:any) => {
+productos.use((req: any, res: any, next: any) => {
   try {
     con = mysql.createPool({
       host: process.env.DB_HOST,
@@ -23,7 +23,7 @@ productos.use((req:any, res:any, next:any) => {
   }
 });
 
-productos.get("/ordenados-descendente", (req:object, res:any) => {
+productos.get("/ordenados-descendente ", (req: object, res: any) => {
   const query = `
   SELECT p.*, SUM(b.cantidad) AS Total
   FROM productos p
@@ -32,7 +32,7 @@ productos.get("/ordenados-descendente", (req:object, res:any) => {
   ORDER BY Total DESC LIMIT 0,100
   `;
 
-  con.query(query, (err:Error, results:any):void => {
+  con.query(query, (err: Error, results: any): void => {
     if (err) {
       console.error(err);
       res.sendStatus(500);
@@ -42,55 +42,49 @@ productos.get("/ordenados-descendente", (req:object, res:any) => {
   });
 });
 
-productos.post("/insertar-producto", (req:any, res:any) => {
+productos.post("/insertar-producto", (req: any, res: any) => {
   try {
-    var dataReq:any = plainToClass(Products, req.body);
-    console.log(dataReq)
+    var dataReq = plainToClass(Products, req.body);
+    console.log(dataReq);
   } catch (error) {
-    
+    console.error(error);
   }
-  try{
-    con.query(`INSERT INTO productos(nombre,descripcion,estado,created_by,update_by) VALUES (?,?,?,?,?)`,
-  [
-    req.body.nombre,
-    req.body.descripcion,
-    req.body.estado,
-    req.body.created_by,
-    req.body.update_by,
-  ],
-  (err:Error, data:any, fils:any) => {
-    if (err) {
-      //console.log(err);
-      res.sendStatus(500);
-    } else {
-      insertIds = data.insertId;
-      console.log(data.insertId)
-      //console.log(insertId);
-    }
+  try {
+    con.query(
+      `INSERT INTO productos(nombre,descripcion,estado,created_by,update_by) VALUES (?,?,?,?,?)`,
+      [
+        req.body.nombre,
+        req.body.descripcion,
+        req.body.estado,
+        req.body.created_by,
+        req.body.update_by,
+      ],
+      (err: any, data: any, fils: any) => {
+        if (err) {
+          //console.log(err);
+          res.sendStatus(500);
+        } else {
+          var insertIds = data.insertId; // Mueve la declaración de la variable insertIds aquí
+          console.log(data.insertId);
+          //console.log(insertId);
+
+          con.query(
+            `INSERT INTO inventarios(id_bodega,id_producto, cantidad,created_by,update_by) VALUES (?,?,?,?,?)`,
+            [12, insertIds, 100, req.body.created_by, req.body.update_by],
+            (err: any, data: any, fils: any) => {
+              console.log(err);
+              console.log(data);
+              console.log(fils);
+
+              res.sendStatus(200).send();
+            }
+          );
+        }
+      }
+    );
+  } catch (e) {
+    res.sendStatus(500);
   }
-);
-  }catch(e){
-    res.sendStatus(500)
-  }
-  try{
-    con.query(`INSERT INTO inventarios(id_bodega,id_producto, cantidad,created_by,update_by) VALUES (?,?,?,?,?)`,
-  [
-    12,
-    insertIds,
-    100,
-    req.body.created_by,
-    req.body.update_by
-  ],
-  (err:Error, data:any, fils:any) => {
-    console.log(err);
-    console.log(data);
-    console.log(fils);
-  });
-  res.sendStatus(200).send();
-  }catch(e){
-    res.sendStatus(500)
-  }
-  
 });
 
 export default productos;

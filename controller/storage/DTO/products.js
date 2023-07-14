@@ -20,21 +20,31 @@ export class Products {
 __decorate([
     Expose({ name: "nombre" }),
     Transform(({ value }) => {
-        let data = /^[0-9]+$/g.test(value);
+        let data = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/g.test(value);
         if (data) {
-            return parseInt(value);
+            return value;
         }
         else {
-            throw {
-                status: 500,
-                message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
-            };
+            throw { status: 500, message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral" };
         }
     }),
     __metadata("design:type", String)
 ], Products.prototype, "NAME", void 0);
 __decorate([
-    Expose({ name: "description" }),
+    Expose({ name: "descripcion" }),
+    Transform(({ value }) => {
+        let data = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/g.test(value);
+        if (data) {
+            return value;
+        }
+        else {
+            throw { status: 500, message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral" };
+        }
+    }),
+    __metadata("design:type", String)
+], Products.prototype, "EXPLANATION", void 0);
+__decorate([
+    Expose({ name: "estado" }),
     Transform(({ value }) => {
         let data = /^[0-9]+$/g.test(value);
         if (data) {
@@ -43,14 +53,10 @@ __decorate([
         else {
             throw {
                 status: 500,
-                message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
+                message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral 3",
             };
         }
     }),
-    __metadata("design:type", String)
-], Products.prototype, "EXPLANATION", void 0);
-__decorate([
-    Expose({ name: "estado" }),
     __metadata("design:type", Number)
 ], Products.prototype, "STATUS", void 0);
 __decorate([
@@ -63,7 +69,7 @@ __decorate([
         else {
             throw {
                 status: 500,
-                message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
+                message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral 4",
             };
         }
     }),
@@ -79,7 +85,7 @@ __decorate([
         else {
             throw {
                 status: 500,
-                message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
+                message: "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral 5",
             };
         }
     }),

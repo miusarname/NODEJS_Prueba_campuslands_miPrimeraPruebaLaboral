@@ -1,10 +1,10 @@
 import express from "express";
 import mysql from "mysql2";
-import { plainToClass } from 'class-transformer';
-import { Products } from '../DTO/products.js';
+import { plainToClass } from "class-transformer";
+import { Products } from "../DTO/products.js";
 const productos = express.Router();
+var insertIds;
 let con;
-let insertIds;
 productos.use((req, res, next) => {
     try {
         con = mysql.createPool({
@@ -21,7 +21,7 @@ productos.use((req, res, next) => {
         res.send(e);
     }
 });
-productos.get("/ordenados-descendente", (req, res) => {
+productos.get("/ordenados-descendente ", (req, res) => {
     const query = `
   SELECT p.*, SUM(b.cantidad) AS Total
   FROM productos p
@@ -60,28 +60,17 @@ productos.post("/insertar-producto", (req, res) => {
                 res.sendStatus(500);
             }
             else {
-                insertIds = data.insertId;
+                var insertIds = data.insertId; // Mueve la declaración de la variable insertIds aquí
                 console.log(data.insertId);
                 //console.log(insertId);
+                con.query(`INSERT INTO inventarios(id_bodega,id_producto, cantidad,created_by,update_by) VALUES (?,?,?,?,?)`, [12, insertIds, 100, req.body.created_by, req.body.update_by], (err, data, fils) => {
+                    console.log(err);
+                    console.log(data);
+                    console.log(fils);
+                    res.sendStatus(200).send();
+                });
             }
         });
-    }
-    catch (e) {
-        res.sendStatus(500);
-    }
-    try {
-        con.query(`INSERT INTO inventarios(id_bodega,id_producto, cantidad,created_by,update_by) VALUES (?,?,?,?,?)`, [
-            12,
-            insertIds,
-            100,
-            req.body.created_by,
-            req.body.update_by
-        ], (err, data, fils) => {
-            console.log(err);
-            console.log(data);
-            console.log(fils);
-        });
-        res.sendStatus(200).send();
     }
     catch (e) {
         res.sendStatus(500);

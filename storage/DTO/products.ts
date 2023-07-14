@@ -2,35 +2,39 @@ import { Type, Transform, Expose } from "class-transformer";
 
 export class Products {
   @Expose({ name: "nombre" })
-  @Transform(({ value }) => {
-    let data = /^[0-9]+$/g.test(value);
-    if (data) {
-      return parseInt(value);
-    } else {
-      throw {
-        status: 500,
-        message:
-          "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
-      };
+  @Transform(({value})=>{
+    let data = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/g.test(value)
+    if (data){
+        return value
+    }else{
+        throw {status : 500, message : "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral"}
     }
   })
   NAME: string;
-  @Expose({ name: "description" })
-  @Transform(({ value }) => {
-    let data = /^[0-9]+$/g.test(value);
-    if (data) {
-      return parseInt(value);
-    } else {
-      throw {
-        status: 500,
-        message:
-          "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
-      };
+  @Expose({ name: "descripcion" })
+  @Transform(({value})=>{
+    let data = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/g.test(value)
+    if (data){
+        return value
+    }else{
+        throw {status : 500, message : "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral"}
     }
   })
   EXPLANATION: string;
   @Expose({ name: "estado" })
-  STATUS: number;
+  @Transform(({ value }) => {
+    let data = /^[0-9]+$/g.test(value);
+    if (data) {
+      return parseInt(value);
+    } else {
+      throw {
+        status: 500,
+        message:
+          "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral 3",
+      };
+    }
+  })
+  STATUS:Number;
   @Expose({ name: "created_by" })
   @Transform(({ value }) => {
     let data = /^[0-9]+$/g.test(value);
@@ -40,7 +44,7 @@ export class Products {
       throw {
         status: 500,
         message:
-          "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
+          "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral 4",
       };
     }
   })
@@ -54,7 +58,7 @@ export class Products {
       throw {
         status: 500,
         message:
-          "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral",
+          "Error: Invalid data type or structure. Please ensure that the provided data matches the expected format. For more information, please visit https://github.com/miusarname/NODEJS_Prueba_campuslands_miPrimeraPruebaLaboral 5",
       };
     }
   })
