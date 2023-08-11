@@ -1,7 +1,7 @@
 import express from "express";
 import mysql from "mysql2";
 import { plainToClass } from "class-transformer";
-import { Products } from "../DTO/products.js";
+import { Products } from "../storage/products.js"
 
 const productos = express.Router();
 var insertIds;

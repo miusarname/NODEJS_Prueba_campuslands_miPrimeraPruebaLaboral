@@ -2,7 +2,9 @@ import express from "express";
 import mysql from "mysql2";
 import axios from "axios";
 import { plainToClass } from "class-transformer";
-import { Cellars } from "../DTO/cellars.js";
+import { Cellars } from "../storage/cellars.js"
+import { limitGrt } from "../limit/config.js";
+import { verifLimiter } from "../middleware/verifLimiter.js";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 
@@ -26,7 +28,7 @@ bodega.use((req, res, next) => {
   }
 });
 
-bodega.get("/", (req, res) => {
+bodega.get("/",limitGrt(),verifLimiter, (req, res) => {
   try {
     con.query(
       `SELECT * FROM bodegas`,
@@ -43,7 +45,7 @@ bodega.get("/", (req, res) => {
   }
 });
 
-bodega.get("/bodegas-ordenadas-alfabeticamente", async (req, res) => {
+bodega.get("/bodegas-ordenadas-alfabeticamente",limitGrt(),verifLimiter, async (req, res) => {
   try {
     const resp = await axios.get("http://localhost:3002/bodegas");
     const toSend = resp.data.sort((a: any, b: any) =>
@@ -57,7 +59,7 @@ bodega.get("/bodegas-ordenadas-alfabeticamente", async (req, res) => {
   }
 });
 
-bodega.post("/", (req, res) => {
+bodega.post("/", limitGrt(),verifLimiter,(req, res) => {
   try {
     var dataReq: any = plainToClass(Cellars, req.body);
   } catch (error) {
