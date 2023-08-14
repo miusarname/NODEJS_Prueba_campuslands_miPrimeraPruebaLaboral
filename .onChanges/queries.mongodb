@@ -1,0 +1,140 @@
+//? SELECT id, cantidad FROM inventarios WHERE id_producto = ? AND id_bodega = ? "
+
+// db.inventarios.find(
+//     {
+//         id_producto: <valor_id_producto>,
+//         id_bodega: <valor_id_bodega>
+//     },
+//     {
+//         _id: 0,
+//         id: 1,
+//         cantidad: 1
+//     }
+// )
+
+//? NSERT INTO inventarios (id_producto, id_bodega, cantidad) VALUES (?, ?, ?)
+
+/*db.inventarios.insertOne({
+    id_producto: <valor_id_producto>,
+    id_bodega: <valor_id_bodega>,
+    cantidad: <valor_cantidad>
+})
+ */
+
+//? UPDATE inventarios SET cantidad = ? WHERE id = ?
+
+/*db.inventarios.updateOne(
+    { id: <valor_id> },
+    {
+        $set: { cantidad: <nuevo_valor_cantidad> }
+    }
+)
+ */
+
+//? SELECT id, cantidad FROM inventarios WHERE id_producto = ? AND id_bodega = ?
+
+/*db.inventarios.find(
+    {
+        id_producto: <valor_id_producto>,
+        id_bodega: <valor_id_bodega>
+    },
+    {
+        _id: 0,
+        id: 1,
+        cantidad: 1
+    }
+)
+ */
+
+//? INSERT INTO historiales (cantidad, id_bodega_origen, id_bodega_destino, id_inventario) VALUES (?, ?, ?, ?)
+
+/*db.historiales.insertOne({
+    cantidad: <valor_cantidad>,
+    id_bodega_origen: <valor_id_bodega_origen>,
+    id_bodega_destino: <valor_id_bodega_destino>,
+    id_inventario: <valor_id_inventario>
+})
+ */
+
+
+//? INSERT INTO inventarios (id_producto, id_bodega, cantidad) VALUES (?, ?, ?)
+
+
+/*db.inventarios.insertOne({
+    id_producto: <valor_id_producto>,
+    id_bodega: <valor_id_bodega>,
+    cantidad: <valor_cantidad>
+})
+ */
+
+//? SELECT p.*, SUM(b.cantidad) AS Total FROM productos p  JOIN inventarios b ON p.id = b.id_producto GROUP BY p.id  ORDER BY Total DESC LIMIT 0,100
+
+/**
+ * db.productos.aggregate([
+    {
+        $lookup: {
+            from: "inventarios",
+            localField: "id",
+            foreignField: "id_producto",
+            as: "inventarios"
+        }
+    },
+    {
+        $unwind: "$inventarios"
+    },
+    {
+        $group: {
+            _id: "$id",
+            producto: { $first: "$$ROOT" },
+            Total: { $sum: "$inventarios.cantidad" }
+        }
+    },
+    {
+        $sort: { Total: -1 }
+    },
+    {
+        $limit: 100
+    },
+    {
+        $replaceRoot: { newRoot: "$producto" }
+    }
+])
+
+ */
+
+//? INSERT INTO productos(nombre,descripcion,estado,created_by,update_by) VALUES (?,?,?,?,?)
+
+/*db.productos.insertOne({
+    nombre: <valor_nombre>,
+    descripcion: <valor_descripcion>,
+    estado: <valor_estado>,
+    created_by: <valor_created_by>,
+    update_by: <valor_update_by>
+})
+ */
+
+//? INSERT INTO inventarios(id_bodega,id_producto, cantidad,created_by,update_by) VALUES (?,?,?,?,?)
+
+/*db.inventarios.insertOne({
+    id_bodega: <valor_id_bodega>,
+    id_producto: <valor_id_producto>,
+    cantidad: <valor_cantidad>,
+    created_by: <valor_created_by>,
+    update_by: <valor_update_by>
+})
+ */
+
+//? SELECT * FROM bodegas
+
+/*db.bodegas.find({}) */
+
+//? INSERT INTO bodegas (nombre, id_responsable,estado,created_by,update_by) VALUES (?,?,?,?,?)
+
+/*db.bodegas.insertOne({
+    nombre: <valor_nombre>,
+    id_responsable: <valor_id_responsable>,
+    estado: <valor_estado>,
+    created_by: <valor_created_by>,
+    update_by: <valor_update_by>
+})
+ */
