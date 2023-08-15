@@ -10,13 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { MongoClient } from "mongodb";
 import dotenv from 'dotenv';
 dotenv.config({ path: "../" });
-export function con() {
+export function con(db_name) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const uri = `mongodb+srv://${process.env.ATLAS_USER}:${process.env.ATLAS_PASSWORD}@cluster0.ap9ecpy.mongodb.net/${process.env.ATLAS_DB}`;
-            ;
+            const uri = process.env.ATLAS_STRCONNECT;
+            console.log(uri);
             const client = yield MongoClient.connect(uri);
-            return client.db();
+            console.log(uri);
+            return client.db(db_name);
         }
         catch (error) {
             return { status: 500, message: error.message };

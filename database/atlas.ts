@@ -3,11 +3,13 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: "../" });
 
-export async function con(): Promise<Db | { status: number; message: string }> {
+export async function con(db_name): Promise<Db | { status: number; message: string } | any> {
     try {
-        const uri = `mongodb+srv://${process.env.ATLAS_USER}:${process.env.ATLAS_PASSWORD}@cluster0.ap9ecpy.mongodb.net/${process.env.ATLAS_DB}`;;
+        const uri = process.env.ATLAS_STRCONNECT;
+        console.log(uri)
         const client = await MongoClient.connect(uri);
-        return client.db();
+        console.log(uri)
+        return client.db(db_name);
     } catch (error) {
         return { status: 500, message: error.message };
     }
