@@ -11,7 +11,7 @@ const bodega = express.Router();
 bodega.get("/", limitGrt(), verifLimiter, async (req: any, res) => {
   if (!req.rateLimit) return;
   console.log(req.rateLimit);
-  let db = await con("db_prueba");
+  let db = await con();
   console.log(db);
   let usuario = db.collection("bodegas");
   let result = await usuario.find({}).toArray();
@@ -38,14 +38,11 @@ bodega.get(
 );
 
 bodega.post("/", limitGrt(), verifLimiter, async (req: any, res) => {
+  if (!req.rateLimit) return;
   try {
     var { CREATED_BY, NAME, RESPONSIBLE_NUMBER, STATUS, UPDATED_BY } =
       plainToClass(Cellars, req.body);
-  } catch (error) {
-    console.error(error);
-  }
-  if (!req.rateLimit) return;
-  console.log(req.rateLimit);
+      console.log(req.rateLimit);
   let db = await con();
   let bodegas = db.collection("bodegas");
   let result = await bodegas.insertOne({
@@ -56,6 +53,10 @@ bodega.post("/", limitGrt(), verifLimiter, async (req: any, res) => {
     update_by: UPDATED_BY,
   });
   res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(error.status).send(error)
+  }
 });
 
 export default bodega;

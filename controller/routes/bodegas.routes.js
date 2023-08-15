@@ -19,7 +19,7 @@ bodega.get("/", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0
     if (!req.rateLimit)
         return;
     console.log(req.rateLimit);
-    let db = yield con("db_prueba");
+    let db = yield con();
     console.log(db);
     let usuario = db.collection("bodegas");
     let result = yield usuario.find({}).toArray();
@@ -37,24 +37,25 @@ bodega.get("/bodegas-ordenadas-alfabeticamente", limitGrt(), verifLimiter, (req,
     }
 }));
 bodega.post("/", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.rateLimit)
+        return;
     try {
         var { CREATED_BY, NAME, RESPONSIBLE_NUMBER, STATUS, UPDATED_BY } = plainToClass(Cellars, req.body);
+        console.log(req.rateLimit);
+        let db = yield con();
+        let bodegas = db.collection("bodegas");
+        let result = yield bodegas.insertOne({
+            nombre: NAME,
+            id_responsable: RESPONSIBLE_NUMBER,
+            estado: STATUS,
+            created_by: CREATED_BY,
+            update_by: UPDATED_BY,
+        });
+        res.send(result);
     }
     catch (error) {
         console.error(error);
+        res.status(error.status).send(error);
     }
-    if (!req.rateLimit)
-        return;
-    console.log(req.rateLimit);
-    let db = yield con();
-    let bodegas = db.collection("bodegas");
-    let result = yield bodegas.insertOne({
-        nombre: NAME,
-        id_responsable: RESPONSIBLE_NUMBER,
-        estado: STATUS,
-        created_by: CREATED_BY,
-        update_by: UPDATED_BY,
-    });
-    res.send(result);
 }));
 export default bodega;
