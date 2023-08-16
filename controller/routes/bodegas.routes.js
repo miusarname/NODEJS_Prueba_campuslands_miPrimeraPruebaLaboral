@@ -13,6 +13,7 @@ import { con } from "../database/atlas.js";
 import { plainToClass } from "class-transformer";
 import { Cellars } from "../storage/cellars.js";
 import { limitGrt } from "../limit/config.js";
+import { ErrorHandler } from "../storage/errorHandle.js";
 import { verifLimiter } from "../middleware/verifLimiter.js";
 const bodega = express.Router();
 bodega.get("/", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -33,7 +34,9 @@ bodega.get("/bodegas-ordenadas-alfabeticamente", limitGrt(), verifLimiter, (req,
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.log(error.errInfo.details.schemaRulesNotSatisfied);
+        let errorhandl = new ErrorHandler(error);
+        res.send(errorhandl.handerErrorSucess);
     }
 }));
 bodega.post("/", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -51,11 +54,20 @@ bodega.post("/", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 
             created_by: CREATED_BY,
             update_by: UPDATED_BY,
         });
-        res.send(result);
+        if (!result.insertedId)
+            res.status(500).send(JSON.stringify({ "Status": 500, "message": "bad" }));
+        res.status(201).send(JSON.stringify({ "Status": 201, "message": "success" }));
     }
     catch (error) {
         console.error(error);
-        res.status(error.status).send(error);
+        if (error.errInfo.details.schemaRulesNotSatisfied) {
+            console.log(error.errInfo.details.schemaRulesNotSatisfied);
+            let errorhandl = new ErrorHandler(error);
+            res.send(errorhandl.handerErrorSucess);
+        }
+        else {
+            res.status(500).send(JSON.stringify({ "status": 500, "message": error }));
+        }
     }
 }));
 export default bodega;

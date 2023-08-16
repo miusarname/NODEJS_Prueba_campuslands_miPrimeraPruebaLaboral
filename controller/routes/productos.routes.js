@@ -1,45 +1,63 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import express from "express";
-import mysql from "mysql2";
+import { limitGrt } from "../limit/config.js";
+import { con } from "../database/atlas.js";
+import { verifLimiter } from "../middleware/verifLimiter.js";
+import { ErrorHandler } from "../storage/errorHandle.js";
 import { plainToClass } from "class-transformer";
 import { Products } from "../storage/products.js";
 const productos = express.Router();
 var insertIds;
-let con;
-productos.use((req, res, next) => {
-    try {
-        con = mysql.createPool({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USERNAME,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DATABASE,
-        });
-        //console.log(con);
-        next();
-    }
-    catch (e) {
-        res.sendStatus(500);
-        res.send(e);
-    }
-});
-productos.get("/ordenados-descendente ", (req, res) => {
-    const query = `
-  SELECT p.*, SUM(b.cantidad) AS Total
-  FROM productos p
-  JOIN inventarios b ON p.id = b.id_producto
-  GROUP BY p.id
-  ORDER BY Total DESC LIMIT 0,100
-  `;
-    con.query(query, (err, results) => {
-        if (err) {
-            console.error(err);
-            res.sendStatus(500);
+productos.get("/ordenados-descendente ", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.rateLimit)
+        return;
+    console.log(req.rateLimit);
+    var db = yield con();
+    console.log(db);
+    db.productos.aggregate([
+        {
+            $lookup: {
+                from: "inventarios",
+                localField: "id",
+                foreignField: "id_producto",
+                as: "inventarios"
+            }
+        },
+        {
+            $unwind: "$inventarios"
+        },
+        {
+            $group: {
+                _id: "$id",
+                producto: { $first: "$$ROOT" },
+                Total: { $sum: "$inventarios.cantidad" }
+            }
+        },
+        {
+            $sort: { Total: -1 }
+        },
+        {
+            $limit: 100
+        },
+        {
+            $replaceRoot: { newRoot: "$producto" }
         }
-        else {
-            res.send(results);
-        }
-    });
-});
-productos.post("/insertar-producto", (req, res) => {
+    ]);
+}));
+productos.post("/insertar-producto", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.rateLimit)
+        return;
+    console.log(req.rateLimit);
+    var db = yield con();
+    console.log(db);
     try {
         var dataReq = plainToClass(Products, req.body);
         console.log(dataReq);
@@ -48,32 +66,32 @@ productos.post("/insertar-producto", (req, res) => {
         console.error(error);
     }
     try {
-        con.query(`INSERT INTO productos(nombre,descripcion,estado,created_by,update_by) VALUES (?,?,?,?,?)`, [
-            req.body.nombre,
-            req.body.descripcion,
-            req.body.estado,
-            req.body.created_by,
-            req.body.update_by,
-        ], (err, data, fils) => {
-            if (err) {
-                //console.log(err);
-                res.sendStatus(500);
-            }
-            else {
-                var insertIds = data.insertId; // Mueve la declaración de la variable insertIds aquí
-                console.log(data.insertId);
-                //console.log(insertId);
-                con.query(`INSERT INTO inventarios(id_bodega,id_producto, cantidad,created_by,update_by) VALUES (?,?,?,?,?)`, [12, insertIds, 100, req.body.created_by, req.body.update_by], (err, data, fils) => {
-                    console.log(err);
-                    console.log(data);
-                    console.log(fils);
-                    res.sendStatus(200).send();
-                });
-            }
-        });
+        try {
+            db.productos.insertOne({
+                nombre: req.body.nombre,
+                descripcion: req.body.descripcion,
+                estado: req.body.estado,
+                created_by: req.body.created_by,
+                update_by: req.body.update_by
+            });
+            db.inventarios.insertOne({
+                id_bodega: 12,
+                id_producto: insertIds,
+                cantidad: 100,
+                created_by: req.body.created_by,
+                update_by: req.body.update_by
+            });
+        }
+        catch (error) {
+            console.log(error.errInfo.details.schemaRulesNotSatisfied);
+            let errorhandl = new ErrorHandler(error);
+            res.send(errorhandl.handerErrorSucess);
+        }
     }
     catch (e) {
-        res.sendStatus(500);
+        console.log(e.errInfo.details.schemaRulesNotSatisfied);
+        let errorhandl = new ErrorHandler(e);
+        res.send(errorhandl.handerErrorSucess);
     }
-});
+}));
 export default productos;

@@ -8,87 +8,124 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import express from "express";
-import mysql from "mysql2";
+import { limitGrt } from "../limit/config.js";
+import { con } from "../database/atlas.js";
+import { verifLimiter } from "../middleware/verifLimiter.js";
+import { ErrorHandler } from "../storage/errorHandle.js";
 const inventarios = express.Router();
 let connection;
-inventarios.use((req, res, next) => {
-    try {
-        connection = mysql.createPool({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USERNAME,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DATABASE,
-        });
-        console.log(connection);
-        next();
-    }
-    catch (e) {
-        res.sendStatus(500);
-        res.send(e);
-    }
-});
-inventarios.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+inventarios.post("/", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id_producto, id_bodega, cantidad } = req.body;
+    if (!req.rateLimit)
+        return;
+    console.log(req.rateLimit);
+    var db = yield con();
+    console.log(db);
     try {
         // Verificar si la combinación de bodega y producto ya existe
-        const [existingInventory] = yield connection.query('SELECT id, cantidad FROM inventarios WHERE id_producto = ? AND id_bodega = ?', [id_producto, id_bodega]);
+        const [existingInventory] = db.inventarios.find({
+            id_producto: id_producto,
+            id_bodega: id_bodega,
+        }, {
+            _id: 0,
+            id: 1,
+            cantidad: 1,
+        });
         if (existingInventory.length === 0) {
             // Combinación nueva, realizar un INSERT
-            yield connection.query('INSERT INTO inventarios (id_producto, id_bodega, cantidad) VALUES (?, ?, ?)', [
-                id_producto,
-                id_bodega,
-                cantidad,
-            ]);
+            db.inventarios.insertOne({
+                id_producto: id_producto,
+                id_bodega: id_bodega,
+                cantidad: cantidad
+            });
         }
         else {
             // Combinación existente, realizar un UPDATE
             const updatedQuantity = existingInventory[0].cantidad + cantidad;
-            yield connection.query('UPDATE inventarios SET cantidad = ? WHERE id = ?', [updatedQuantity, existingInventory[0].id]);
+            db.inventarios.updateOne({ id: existingInventory[0].id }, {
+                $set: { cantidad: updatedQuantity }
+            });
         }
-        res.status(200).json({ message: 'Registro insertado correctamente' });
+        res.status(200).json({ message: "Registro insertado correctamente" });
     }
     catch (error) {
-        console.error('Error al insertar en la tabla de inventarios:', error);
-        res.status(500).json({ message: 'Error al insertar en la tabla de inventarios' });
+        console.error("Error al insertar en la tabla de inventarios:", error);
+        console.log(error.errInfo.details.schemaRulesNotSatisfied);
+        let errorhandl = new ErrorHandler(error);
+        res.send(errorhandl.handerErrorSucess);
     }
 }));
-inventarios.put('/traslados', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+inventarios.put("/traslados", limitGrt(), verifLimiter, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id_producto, id_bodega_origen, id_bodega_destino, cantidad } = req.body;
+    if (!req.rateLimit)
+        return;
+    console.log(req.rateLimit);
+    var db = yield con();
+    console.log(db);
     try {
         // Verificar si la cantidad solicitada se puede extraer de la bodega de origen
-        const [originInventory] = yield connection.query('SELECT id, cantidad FROM inventarios WHERE id_producto = ? AND id_bodega = ?', [id_producto, id_bodega_origen]);
-        if (!originInventory || originInventory.length === 0 || originInventory[0].cantidad < cantidad) {
-            res.status(400).json({ message: 'No hay suficientes unidades en la bodega de origen' });
+        const [originInventory] = db.inventarios.find({
+            id_producto: id_producto,
+            id_bodega: id_bodega_origen
+        }, {
+            _id: 0,
+            id: 1,
+            cantidad: 1
+        });
+        if (!originInventory ||
+            originInventory.length === 0 ||
+            originInventory[0].cantidad < cantidad) {
+            res
+                .status(400)
+                .json({
+                message: "No hay suficientes unidades en la bodega de origen",
+            });
             return;
         }
         // Realizar el traslado
         const updatedOriginQuantity = originInventory[0].cantidad - cantidad;
-        const [destinationInventory] = yield connection.query('SELECT id, cantidad FROM inventarios WHERE id_producto = ? AND id_bodega = ?', [id_producto, id_bodega_destino]);
+        const [destinationInventory] = db.inventarios.find({
+            id_producto: id_producto,
+            id_bodega: id_bodega_destino
+        }, {
+            _id: 0,
+            id: 1,
+            cantidad: 1
+        });
         if (destinationInventory && destinationInventory.length > 0) {
             // Actualizar el inventario de destino
             const updatedDestinationQuantity = destinationInventory[0].cantidad + cantidad;
-            yield connection.query('UPDATE inventarios SET cantidad = ? WHERE id = ?', [
-                updatedDestinationQuantity,
-                destinationInventory[0].id,
-            ]);
+            db.inventarios.updateOne({ id: destinationInventory[0].id }, {
+                $set: { cantidad: updatedDestinationQuantity }
+            });
         }
         else {
             // Insertar un nuevo registro en el inventario de destino
-            yield connection.query('INSERT INTO inventarios (id_producto, id_bodega, cantidad) VALUES (?, ?, ?)', [
-                id_producto,
-                id_bodega_destino,
-                cantidad,
-            ]);
+            db.inventarios.insertOne({
+                id_producto: id_producto,
+                id_bodega: id_bodega_destino,
+                cantidad: cantidad
+            });
         }
         // Actualizar el inventario de origen
-        yield connection.query('UPDATE inventarios SET cantidad = ? WHERE id = ?', [updatedOriginQuantity, originInventory[0].id]);
+        yield connection.query("UPDATE inventarios SET cantidad = ? WHERE id = ?", [
+            updatedOriginQuantity,
+            originInventory[0].id,
+        ]);
         // Insertar registro en la tabla de historiales
-        yield connection.query('INSERT INTO historiales (cantidad, id_bodega_origen, id_bodega_destino, id_inventario) VALUES (?, ?, ?, ?)', [cantidad, id_bodega_origen, id_bodega_destino, originInventory[0].id]);
-        res.status(200).json({ message: 'Traslado realizado correctamente' });
+        db.historiales.insertOne({
+            cantidad: cantidad,
+            id_bodega_origen: id_bodega_origen,
+            id_bodega_destino: id_bodega_destino,
+            id_inventario: originInventory[0].id
+        });
+        res.status(200).json({ message: "Traslado realizado correctamente" });
     }
     catch (error) {
-        console.error('Error al realizar el traslado:', error);
-        res.status(500).json({ message: 'Error al realizar el traslado' });
+        console.error("Error al realizar el traslado:", error);
+        console.log(error.errInfo.details.schemaRulesNotSatisfied);
+        let errorhandl = new ErrorHandler(error);
+        res.send(errorhandl.handerErrorSucess);
     }
 }));
 export default inventarios;
