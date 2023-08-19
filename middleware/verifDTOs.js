@@ -7,7 +7,7 @@ import { Stocktaking } from "../storage/stocktaking";
 import { Router } from "express";
 export const appDTOData = Router();
 
-appDTOData.use(async (req: any, res, next) => {
+appDTOData.use(async (req, res, next) => {
   try {
     if (!req.data || !req.data.obj) {
       return res.status(400).json({ error: "Invalid data" });

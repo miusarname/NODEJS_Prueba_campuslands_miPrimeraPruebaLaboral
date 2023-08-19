@@ -3,15 +3,15 @@ import { limitGrt } from "../limit/config.js";
 import { con } from "../database/atlas.js";
 import { verifLimiter } from "../middleware/verifLimiter.js";
 import mysql from "mysql2";
-import { ErrorHandler } from "../storage/errorHandle.js";
+import { ErrorHandler } from "../controller/storage/errorHandle.js";
 import { plainToClass } from "class-transformer";
-import { Products } from "../storage/products.js"
+import { Products } from "../controller/storage/products.js"
 
 const productos = express.Router();
 var insertIds;
 
 
-productos.get("/ordenados-descendente ",limitGrt(), verifLimiter, async(req: any, res: any) => {
+productos.get("/ordenados-descendente ",limitGrt(), verifLimiter, async(req, res) => {
   if (!req.rateLimit) return;
   console.log(req.rateLimit);
   var db = await con();
@@ -47,7 +47,7 @@ productos.get("/ordenados-descendente ",limitGrt(), verifLimiter, async(req: any
 ])
 });
 
-productos.post("/insertar-producto", limitGrt(), verifLimiter,async(req: any, res: any) => {
+productos.post("/insertar-producto", limitGrt(), verifLimiter,async(req, res) => {
   if (!req.rateLimit) return;
   console.log(req.rateLimit);
   var db = await con();

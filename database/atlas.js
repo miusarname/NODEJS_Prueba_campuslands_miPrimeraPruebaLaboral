@@ -1,9 +1,9 @@
-import { MongoClient, Db, MongoClientOptions } from "mongodb";
+import { MongoClient, Db } from "mongodb";
 import dotenv from 'dotenv';
 
 dotenv.config({ path: "../" });
 
-export async function con(): Promise<Db | { status: number; message: string } | any> {
+export async function con() {
     try {
         const uri = process.env.ATLAS_STRCONNECT;
         console.log(uri)

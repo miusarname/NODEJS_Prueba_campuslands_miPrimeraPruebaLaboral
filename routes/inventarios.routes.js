@@ -2,12 +2,12 @@ import express, { Router } from "express";
 import { limitGrt } from "../limit/config.js";
 import { con } from "../database/atlas.js";
 import { verifLimiter } from "../middleware/verifLimiter.js";
-import { ErrorHandler } from "../storage/errorHandle.js";
+import { ErrorHandler } from "../controller/storage/errorHandle.js";
 
-const inventarios: Router = express.Router();
-let connection: any;
+const inventarios = express.Router();
+let connection;
 
-inventarios.post("/", limitGrt(), verifLimiter, async (req: any, res) => {
+inventarios.post("/", limitGrt(), verifLimiter, async (req, res) => {
   const { id_producto, id_bodega, cantidad } = req.body;
   if (!req.rateLimit) return;
   console.log(req.rateLimit);
@@ -55,7 +55,7 @@ inventarios.post("/", limitGrt(), verifLimiter, async (req: any, res) => {
   }
 });
 
-inventarios.put("/traslados",limitGrt(), verifLimiter, async (req:any, res) => {
+inventarios.put("/traslados",limitGrt(), verifLimiter, async (req, res) => {
   const { id_producto, id_bodega_origen, id_bodega_destino, cantidad } =
     req.body;
     if (!req.rateLimit) return;

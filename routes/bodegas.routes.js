@@ -2,16 +2,16 @@ import express from "express";
 import axios from "axios";
 import { con } from "../database/atlas.js";
 import { plainToClass } from "class-transformer";
-import { Cellars } from "../storage/cellars.js";
-import { ProductDTO } from "../storage/transform.js"
+import { Cellars } from "../controller/storage/cellars.js";
+import { ProductDTO } from "../controller/storage/transform.js"
 import { limitGrt } from "../limit/config.js";
-import { ErrorHandler } from "../storage/errorHandle.js";
+import { ErrorHandler } from "../controller/storage/errorHandle.js";
 import { verifLimiter } from "../middleware/verifLimiter.js";
 import { json } from "stream/consumers";
 
 const bodega = express.Router();
 
-bodega.get("/", limitGrt(), verifLimiter, async (req: any, res) => {
+bodega.get("/", limitGrt(), verifLimiter, async (req, res) => {
   if (!req.rateLimit) return;
   console.log(req.rateLimit);
   let db = await con();
@@ -28,7 +28,7 @@ bodega.get(
   async (req, res) => {
     try {
       const resp = await axios.get("http://localhost:3002/bodegas");
-      const toSend = resp.data.sort((a: any, b: any) =>
+      const toSend = resp.data.sort((a, b) =>
         a.nombre.localeCompare(b.nombre)
       ); // Obtén los datos de response
 
@@ -42,7 +42,7 @@ bodega.get(
   }
 );
 
-bodega.post("/", limitGrt(), verifLimiter, async (req: any, res) => {
+bodega.post("/", limitGrt(), verifLimiter, async (req, res) => {
   if (!req.rateLimit) return;
   try {
     var { CREATED_BY, NAME, RESPONSIBLE_NUMBER, STATUS, UPDATED_BY } =

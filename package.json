@@ -2,7 +2,7 @@
   "name": "prueba",
   "version": "1.0.0",
   "description": "",
-  "main": "./controller/index.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon --quiet index.js",

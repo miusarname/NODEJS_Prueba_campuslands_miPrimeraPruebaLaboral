@@ -12,7 +12,7 @@ import {Stocktaking} from "../storage/stocktaking.js";
 dotenv.config({path:"../"});
 const appToken = Router();
 const appVerify = Router();
-appToken.use("/:collecion", async(req:any,res)=>{
+appToken.use("/:collecion", async(req,res)=>{
     try {
         let inst =  plainToClass(eval(req.params.collecion), {}, { ignoreDecorators: true })
         console.log(inst)
@@ -30,7 +30,7 @@ appToken.use("/:collecion", async(req:any,res)=>{
     }
 })
 
-appVerify.use("/", async(req:any,res,next)=>{
+appVerify.use("/", async(req,res,next)=>{
     const {authorization} = req.headers;
     if (!authorization) return res.status(400).send({status: 400, token: "Token no enviado"});
     try {
