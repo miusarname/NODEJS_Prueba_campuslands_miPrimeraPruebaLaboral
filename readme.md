@@ -49,3 +49,4 @@ Este proyecto se distribuye bajo la licencia [MIT](LICENCE).
 ---
 
 **NOTA:** La estructura y contenido del archivo de base de datos original ha sido adaptada y modificada para cumplir con los requerimientos del proyecto. Puedes encontrar el archivo de configuración de la base de datos MongoDB en la ruta "config/db.js".
+
